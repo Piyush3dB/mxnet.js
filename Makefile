@@ -9,7 +9,7 @@ endif
 # type make rebuild
 rebuild:
 	echo "Rebuild libmxnet_predict.js from MXNet with emscripten"
-	cd $(MXNET)/amalgamation/; rm -f mxnet_predict-all.cc; make libmxnet_predict.js MIN=1; cd -
+	cd $(MXNET)/amalgamation/; rm -f mxnet_predict-all.cc; make clean libmxnet_predict.js MIN=1; cd -
 	cp $(MXNET)/amalgamation/libmxnet_predict.js* .
 
 
