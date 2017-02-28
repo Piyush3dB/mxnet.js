@@ -15,3 +15,14 @@ wget --no-check-certificate https://raw.githubusercontent.com/dmlc/mxnet.js/mast
 # Get inception model
 wget --no-check-certificate http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz;
 tar -zxvf inception-bn.tar.gz
+
+# Create Symbol + params file for JSON
+cp Inception-BN-symbol.json ./Inception-BN-symbol-auto.json
+sed -i '1s/^/{\n"symbol":\n/' ./Inception-BN-symbol-auto.json
+sed -i '$s/$/,/' ./Inception-BN-symbol-auto.json
+echo -en "\n" >> ./Inception-BN-symbol-auto.json
+cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> ./Inception-BN-symbol-auto.json
+echo -en "\n" >> ./Inception-BN-symbol-auto.json
+base64 -w 0 Inception-BN-0126.params | sed 's/.*/"parambase64": "&"/' >> ./Inception-BN-symbol-auto.json
+echo -en "\n" >> ./Inception-BN-symbol-auto.json
+echo } >> ./Inception-BN-symbol-auto.json
