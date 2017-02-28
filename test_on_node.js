@@ -23,3 +23,4 @@ for (var i = 0; i < out.data.length; ++i) {
 console.log('Top-1: ' + model.synset[max_index] + ', value=' + out.data[max_index]);
 pred.destroy();
 
+//   docker run -it --rm --name my-running-script -v "$PWD":/usr/src/app -w /usr/src/app node:4 node test_on_node.js
