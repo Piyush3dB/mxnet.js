@@ -42,8 +42,9 @@ function base64Decode(b64) {
  * @return The constructed NDArray object.
  */
 function ndarray(data, shape) {
-  var data = Float32Array.from(data);
-  var shape = Uint32Array.from(shape);
+  var data = new Float32Array(data);
+  //console.log(data);
+  var shape = new Uint32Array(shape);
   var size = shape.reduce(function(a, b) { return a * b; }, 1);
   if (data.length != size) {
     throw "Size and shape mismatch";
