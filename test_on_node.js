@@ -1,5 +1,7 @@
 var mx = require("./mxnet_predict.js");
 var model = require("./model/fastpoor.json");
+var model = require("./model/inception-bn-model.json");
+var model = require("./model/data/Inception-BN-symbol-try.json");
 var cat_encoded = require("./data/cat.base64.json");
 var decode = mx.base64Decode(cat_encoded);
 var decoded = new Float32Array(decode.buffer);
