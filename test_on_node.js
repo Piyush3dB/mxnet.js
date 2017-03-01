@@ -1,7 +1,15 @@
+//var printf = require('printf');
+
 var mx = require("./mxnet_predict.js");
 var model = require("./model/fastpoor.json");
 var model = require("./model/inception-bn-model.json");
 var model = require("./model/data/Inception-BN-symbol-js.json");
+
+//var model = require("./model/squeezenet_v1.0-symbol-js.json");
+var model = require("./model/squeezenet_v1.1-symbol-js.json");
+
+
+
 var cat_encoded = require("./data/cat.base64.json");
 var decode = mx.base64Decode(cat_encoded);
 var decoded = new Float32Array(decode.buffer);
@@ -32,12 +40,10 @@ for (var i=0;i<out.data.length;i++) {
 max_output = 10;
 console.log("Max output = " + max_output);
 index.sort(function(a,b) {return out.data[b]-out.data[a];});
-//var end = new Date().getTime();
-//var time = (end - start) / 1000;
-//console.log("time-cost=" + time + " sec");
+
 for (var i = 0; i < max_output; i++) {
 	//console.log('Top-' + (i+1) + ':' + model.synset[index[i]] + ', value=' + out.data[index[i]]);
-	console.log("Top-%d: %s, value=%f", (i+1), model.synset[index[i]], out.data[index[i]]);
+	console.log("Top-%d: %s, value=%d", (i+1), model.synset[index[i]], out.data[index[i]]);
 }
 
 
