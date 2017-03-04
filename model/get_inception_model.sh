@@ -3,9 +3,54 @@ script_name=$0
 
 USAGE ()
 {
-    echo "Download model from DMLC Model Gallery and prepare into JSON format for JS model"
+    echo "  "
+    echo "  "
+    echo "Script downloads model from the MXNet Model Gallery "
+    echo "  and prepares a combined JSON file containing the  "
+    echo "  computation graph and weights."
+    echo "Usage:"
     echo "${script_name} [-squeezenet] [-nin] [-caffenet] [-resnet] [-inceptionbn]"
+    echo "  "
+    echo "  "
 }
+
+
+prep_json_for_js(){
+  echo "Parameter #1 is $1"
+
+  symbolName=$1".json"
+  jsName=$1"-js.json"
+  paramsFile=$2
+
+  echo $symbolName
+  echo $paramsFile
+
+  #exit 0
+
+
+  # Create Symbol + params file for JSON
+  cp $symbolName $jsName
+  sed -i '1s/^/{\n"symbol":\n/' $jsName
+  sed -i '$s/$/,/' $jsName
+  echo -en "\n" >> $jsName
+  cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
+  echo -en "\n" >> $jsName
+  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
+  echo -en "\n" >> $jsName
+  echo } >> $jsName
+}
+
+prep_inception_model(){
+  # Get inception model
+
+  wget --no-check-certificate http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz
+  tar -zxvf inception-bn.tar.gz
+  
+  # Call function
+  prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
+}
+
+
 
 while [ "$1" != "" ]; do
   case $1 in
@@ -18,6 +63,20 @@ while [ "$1" != "" ]; do
   shift
 done
 
+
+# Create data dir
+THIS_DIR=$(cd `dirname $0`; pwd)
+DATA_DIR="${THIS_DIR}/data/"
+
+if [[ ! -d "${DATA_DIR}" ]]; then
+  echo "${DATA_DIR} doesn't exist, will create one";
+  mkdir -p ${DATA_DIR}
+fi
+cd ${DATA_DIR}
+
+
+
+
 echo $TYPE
 
 if [ ! "$TYPE" ]; then
@@ -29,34 +88,29 @@ fi
 
 case $TYPE in
   all)
-    echo "all";;
+    echo "Preparing all models...";;
   nin)
-    echo "nin";;
+    echo "nin model...";;
   inceptionbn)
-    echo "inceptionBN";;
+    echo "inceptionBN model..."
+    prep_inception_model
+    ;;
   squeezenet)
-    echo "squeezenet";;
+    echo "squeezenet model...";;
   resnet)
-    echo "resnet";;
+    echo "resnet model...";;
   caffenet)
-    echo "caffenet";;
+    echo "caffenet model...";;
 esac
 
 
+#prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
+
+
+
+
+
 exit 0
-
-
-
-
-THIS_DIR=$(cd `dirname $0`; pwd)
-DATA_DIR="${THIS_DIR}/data/"
-
-if [[ ! -d "${DATA_DIR}" ]]; then
-  echo "${DATA_DIR} doesn't exist, will create one";
-  mkdir -p ${DATA_DIR}
-fi
-cd ${DATA_DIR}
-
 
 get_cat_image(){
 	# Get cat image
@@ -64,27 +118,9 @@ get_cat_image(){
 }
 
 
-prep_json_for_js(){
-	# Create Symbol + params file for JSON
-	cp Inception-BN-symbol.json ./Inception-BN-symbol-js.json
-	sed -i '1s/^/{\n"symbol":\n/' ./Inception-BN-symbol-js.json
-	sed -i '$s/$/,/' ./Inception-BN-symbol-js.json
-	echo -en "\n" >> ./Inception-BN-symbol-js.json
-	cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> ./Inception-BN-symbol-js.json
-	echo -en "\n" >> ./Inception-BN-symbol-js.json
-	base64 -w 0 Inception-BN-0126.params | sed 's/.*/"parambase64": "&"/' >> ./Inception-BN-symbol-js.json
-	echo -en "\n" >> ./Inception-BN-symbol-js.json
-	echo } >> ./Inception-BN-symbol-js.json
-}
 
 
-prep_inception_model(){
-	# Get inception model
-	wget --no-check-certificate http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz;
-	tar -zxvf inception-bn.tar.gz
-	prep_json_for_js
-}
 
 
 #get_cat_image
-prep_inception_model
+prep_inception_model 

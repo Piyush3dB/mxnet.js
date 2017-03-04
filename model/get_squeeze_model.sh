@@ -23,8 +23,8 @@ THIS_DIR=$(cd `dirname $0`; pwd)
 #squeezenet_v1.0-0000.params
 #squeezenet_v1.0-symbol.json
 
-startFile=squeezenet_v1.1-symbol.json
-endFile=./squeezenet_v1.1-symbol-js.json
+startFile=squeezenet_v1.0-symbol.json
+endFile=./squeezenet_v1.0-symbol-js.json
 
 # Create Symbol + params file for JSON
 cp $startFile $endFile
