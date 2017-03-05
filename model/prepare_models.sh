@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 script_name=$0
 
-USAGE ()
-{
+USAGE (){
     echo "  "
     echo "  "
     echo "Script downloads model from the MXNet Model Gallery "
@@ -14,44 +13,53 @@ USAGE ()
     echo "  "
 }
 
+#prep_json_for_js(){
+#  # To call function
+#  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
+#
+#  symbolName=$1".json"
+#  jsName=$1"-js.json"
+#  paramsFile=$2
+#
+#  # Create Symbol + params file for JSON
+#  cp $symbolName $jsName
+#  sed -i '1s/^/{\n"symbol":\n/' $jsName
+#  sed -i '$s/$/,/' $jsName
+#  echo -en "\n" >> $jsName
+#  cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
+#  echo -en "\n" >> $jsName
+#  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
+#  echo -en "\n" >> $jsName
+#  echo } >> $jsName
+#}
 
-prep_json_for_js(){
-  echo "Parameter #1 is $1"
+prep_squeezenet_model(){
+  echo "Preparing squeezenet model..."
 
-  symbolName=$1".json"
-  jsName=$1"-js.json"
-  paramsFile=$2
+  echo "    Downloading model from gallery..."
+  wget --no-check-certificate http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz
+  tar -zxvf inception-bn.tar.gz
 
-  echo $symbolName
-  echo $paramsFile
+  echo "   Running python script to generate json model for JS..."
+  python ../tools/model2json.py Inception-BN-symbol-js.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
 
-  #exit 0
-
-
-  # Create Symbol + params file for JSON
-  cp $symbolName $jsName
-  sed -i '1s/^/{\n"symbol":\n/' $jsName
-  sed -i '$s/$/,/' $jsName
-  echo -en "\n" >> $jsName
-  cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
-  echo -en "\n" >> $jsName
-  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
-  echo -en "\n" >> $jsName
-  echo } >> $jsName
 }
 
 prep_inception_model(){
-  # Get inception model
+  echo "Preparing inceptionbn model..."
 
+  echo "    Downloading inception model from gallery..."
   wget --no-check-certificate http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz
   tar -zxvf inception-bn.tar.gz
-  
-  # Call function
-  prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
+
+  echo "   Running python script to generate json model for JS..."
+  python ../tools/model2json.py Inception-BN-symbol-js.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
 }
 
 
-
+#
+# Parse command-line arguments
+#
 while [ "$1" != "" ]; do
   case $1 in
     -help)
@@ -63,8 +71,16 @@ while [ "$1" != "" ]; do
   shift
 done
 
+if [ ! "$TYPE" ]; then
+  echo "You must specify a test type"
+  USAGE
+  exit 0
+fi
 
+
+#
 # Create data dir
+#
 THIS_DIR=$(cd `dirname $0`; pwd)
 DATA_DIR="${THIS_DIR}/data/"
 
@@ -74,53 +90,22 @@ if [[ ! -d "${DATA_DIR}" ]]; then
 fi
 cd ${DATA_DIR}
 
-
-
-
-echo $TYPE
-
-if [ ! "$TYPE" ]; then
-  echo "You must specify a test type"
-  USAGE
-  exit 0
-fi
-
-
+#
+# Prepare models
+#
 case $TYPE in
   all)
     echo "Preparing all models...";;
+    prep_inception_model
   nin)
-    echo "nin model...";;
+    echo "Preparing nin model...";;
   inceptionbn)
-    echo "inceptionBN model..."
     prep_inception_model
     ;;
   squeezenet)
-    echo "squeezenet model...";;
+    echo "Preparing squeezenet model...";;
   resnet)
-    echo "resnet model...";;
+    echo "Preparing resnet model...";;
   caffenet)
-    echo "caffenet model...";;
+    echo "Preparing caffenet model...";;
 esac
-
-
-#prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
-
-
-
-
-
-exit 0
-
-get_cat_image(){
-	# Get cat image
-	wget --no-check-certificate https://raw.githubusercontent.com/dmlc/mxnet.js/master/data/cat.png;
-}
-
-
-
-
-
-
-#get_cat_image
-prep_inception_model 
