@@ -53,7 +53,12 @@ prep_inception_model(){
   tar -zxvf inception-bn.tar.gz
 
   echo "   Running python script to generate json model for JS..."
-  python ../tools/model2json.py Inception-BN-symbol-js.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+  python ../../tools/model2json.py Inception-BN-symbol-js.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+
+  echo "   Cleaning..."
+  cp Inception-BN-symbol-js.json ..
+  cd ..
+  rm -rf temp
 }
 
 
@@ -79,10 +84,10 @@ fi
 
 
 #
-# Create data dir
+# Create temp dir
 #
 THIS_DIR=$(cd `dirname $0`; pwd)
-DATA_DIR="${THIS_DIR}/data/"
+DATA_DIR="${THIS_DIR}/temp/"
 
 if [[ ! -d "${DATA_DIR}" ]]; then
   echo "${DATA_DIR} doesn't exist, will create one";
@@ -95,17 +100,22 @@ cd ${DATA_DIR}
 #
 case $TYPE in
   all)
-    echo "Preparing all models...";;
+    echo "Preparing all models..."
     prep_inception_model
+    ;;
   nin)
-    echo "Preparing nin model...";;
+    echo "Preparing nin model..."
+    ;;
   inceptionbn)
     prep_inception_model
     ;;
   squeezenet)
-    echo "Preparing squeezenet model...";;
+    echo "Preparing squeezenet model..."
+    ;;
   resnet)
-    echo "Preparing resnet model...";;
+    echo "Preparing resnet model..."
+    ;;
   caffenet)
-    echo "Preparing caffenet model...";;
+    echo "Preparing caffenet model..."
+    ;;
 esac
