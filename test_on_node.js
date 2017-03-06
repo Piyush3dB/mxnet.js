@@ -55,14 +55,15 @@ var cat = mx.ndarray(decoded, [1, 3, 224, 224]);
 //
 // Models
 //
-var modelJSONs = [ "./model/resnet-model.json", 
-                   "./model/nin-model.json", 
-                   "./model/inception-bn-model.json", 
-                   "./model/squeezenet-model.json"]
+// -- run "./models/prepare_models.sh -all" first to run the other two
+var modelJSONs = [ "./model/inception-bn-model.json",
+                   "./model/squeezenet-model.json",
+                   "./model/resnet-model.json",
+                   "./model/nin-model.json"]
 
 //
 // Run all models
 //
-for (var i=0; i<modelJSONs.length; i++) {
+for (var i=0; i<modelJSONs.length-2; i++) {
     runModel(modelJSONs[i], cat);
 }
