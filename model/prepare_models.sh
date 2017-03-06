@@ -8,7 +8,7 @@ USAGE (){
     echo "  and prepares a combined JSON file containing the  "
     echo "  computation graph and weights."
     echo "Usage:"
-    echo "${script_name} [-squeezenet] [-nin] [-caffenet] [-resnet] [-inceptionbn]"
+    echo "${script_name} [-squeezenet] [-nin] [-resnet] [-inceptionbn]"
     echo "  "
     echo "  "
 }
