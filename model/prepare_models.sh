@@ -45,6 +45,32 @@ prep_json_for_js(){
 
 
 
+prep_resnet_model(){
+  echo "Preparing resnet18 model..."
+
+  echo "    Downloading model from gallery..."
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/synset.txt
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/resnet/18-layers/resnet-18-0000.params
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/resnet/18-layers/resnet-18-symbol.json
+
+  echo "   Running python script to generate json model for JS..."
+  prep_json_for_js ../resnet-model.json resnet-18-symbol.json resnet-18-0000.params synset.txt
+
+}
+
+prep_vgg_model(){
+  echo "Preparing vgg-19 model..."
+
+  echo "    Downloading model from gallery..."
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/synset.txt
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/vgg/vgg19-0000.params
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/vgg/vgg19-symbol.json
+
+  echo "   Running python script to generate json model for JS..."
+  prep_json_for_js ../vgg-model.json vgg19-symbol.json vgg19-0000.params synset.txt
+
+}
+
 prep_nin_model(){
   echo "Preparing caffenet model..."
 
@@ -54,7 +80,7 @@ prep_nin_model(){
   wget --no-check-certificate http://data.dmlc.ml/models/imagenet/nin/nin-symbol.json
 
   echo "   Running python script to generate json model for JS..."
-  python ../../tools/model2json.py ../nin-model.json nin-symbol.json nin-0000.params synset.txt
+  prep_json_for_js ../nin-model.json nin-symbol.json nin-0000.params synset.txt
 
 }
 
@@ -67,7 +93,7 @@ prep_caffenet_model(){
   wget --no-check-certificate http://data.dmlc.ml/models/imagenet/caffenet/caffenet-0000.params
 
   echo "   Running python script to generate json model for JS..."
-  python ../../tools/model2json.py ../caffenet-model.json caffenet-symbol.json caffenet-0000.params synset.txt
+  prep_json_for_js ../caffenet-model.json caffenet-symbol.json caffenet-0000.params synset.txt
 
 }
 
@@ -80,7 +106,7 @@ prep_squeezenet_model(){
   wget --no-check-certificate http://data.dmlc.ml/models/imagenet/squeezenet/squeezenet_v1.0-0000.params
 
   echo "   Running python script to generate json model for JS..."
-  python ../../tools/model2json.py ../squeezenet-model.json squeezenet_v1.0-symbol.json squeezenet_v1.0-0000.params synset.txt
+  prep_json_for_js ../squeezenet-model.json squeezenet_v1.0-symbol.json squeezenet_v1.0-0000.params synset.txt
 
 }
 
@@ -92,9 +118,7 @@ prep_inception_model(){
   tar -zxvf inception-bn.tar.gz
 
   echo "   Running python script to generate json model for JS..."
-  #python ../../tools/model2json.py ../inception-bn-model.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
   prep_json_for_js ../inception-bn-model.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
-  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
 
 }
 
@@ -107,7 +131,7 @@ while [ "$1" != "" ]; do
     -help)
       USAGE
       exit 0;;
-      -all | -inceptionbn | -squeezenet | -nin | -caffenet | -resnet)
+      -all | -inceptionbn | -squeezenet | -nin | -caffenet | -resnet | -vgg)
       TYPE=${1:1};;
   esac
   shift
@@ -138,7 +162,10 @@ cd ${TEMP_DIR}
 case $TYPE in
   all)
     echo "Preparing all models..."
+    prep_nin_model
     prep_inception_model
+    prep_squeezenet_model
+    prep_resnet_model
     ;;
   nin)
     prep_nin_model
@@ -150,19 +177,22 @@ case $TYPE in
     prep_squeezenet_model
     ;;
   resnet)
-    echo "Preparing resnet model..."
+    prep_resnet_model
+    ;;
+  vgg)
+    prep_vgg_model
     ;;
   caffenet)
     prep_caffenet_model
     ;;
 esac
 
-#echo "   Cleaning..."
-#cd ${THIS_DIR}
-#rm -rf ${TEMP_DIR}
+echo "   Cleaning..."
+sleep 2
+cd ${THIS_DIR}
+rm -rf ${TEMP_DIR}
 
 echo "Done."
 echo " "
 echo "Contents for this dir:"
 ls -ltrh
-
