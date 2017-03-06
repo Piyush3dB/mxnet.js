@@ -13,35 +13,43 @@ USAGE (){
     echo "  "
 }
 
-#prep_json_for_js(){
-#  # To call function
-#  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
-#
-#  symbolName=$1".json"
-#  jsName=$1"-js.json"
-#  paramsFile=$2
-#
-#  # Create Symbol + params file for JSON
-#  cp $symbolName $jsName
-#  sed -i '1s/^/{\n"symbol":\n/' $jsName
-#  sed -i '$s/$/,/' $jsName
-#  echo -en "\n" >> $jsName
-#  cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
-#  echo -en "\n" >> $jsName
-#  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
-#  echo -en "\n" >> $jsName
-#  echo } >> $jsName
-#}
+
+prep_nin_model(){
+  echo "Preparing caffenet model..."
+
+  echo "    Downloading model from gallery..."
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/synset.txt
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/nin/nin-0000.params
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/nin/nin-symbol.json
+
+  echo "   Running python script to generate json model for JS..."
+  python ../../tools/model2json.py ../nin-model.json nin-symbol.json nin-0000.params synset.txt
+
+}
+
+prep_caffenet_model(){
+  echo "Preparing caffenet model..."
+
+  echo "    Downloading model from gallery..."
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/synset.txt
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/caffenet/caffenet-symbol.json
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/caffenet/caffenet-0000.params
+
+  echo "   Running python script to generate json model for JS..."
+  python ../../tools/model2json.py ../caffenet-model.json caffenet-symbol.json caffenet-0000.params synset.txt
+
+}
 
 prep_squeezenet_model(){
   echo "Preparing squeezenet model..."
 
   echo "    Downloading model from gallery..."
-  wget --no-check-certificate http://data.dmlc.ml/mxnet/models/imagenet/inception-bn.tar.gz
-  tar -zxvf inception-bn.tar.gz
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/synset.txt
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/squeezenet/squeezenet_v1.0-symbol.json
+  wget --no-check-certificate http://data.dmlc.ml/models/imagenet/squeezenet/squeezenet_v1.0-0000.params
 
   echo "   Running python script to generate json model for JS..."
-  python ../tools/model2json.py Inception-BN-symbol-js.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+  python ../../tools/model2json.py ../squeezenet-model.json squeezenet_v1.0-symbol.json squeezenet_v1.0-0000.params synset.txt
 
 }
 
@@ -53,12 +61,8 @@ prep_inception_model(){
   tar -zxvf inception-bn.tar.gz
 
   echo "   Running python script to generate json model for JS..."
-  python ../../tools/model2json.py Inception-BN-symbol-js.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+  python ../../tools/model2json.py ../inception-bn-model.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
 
-  echo "   Cleaning..."
-  cp Inception-BN-symbol-js.json ..
-  cd ..
-  rm -rf temp
 }
 
 
@@ -87,13 +91,13 @@ fi
 # Create temp dir
 #
 THIS_DIR=$(cd `dirname $0`; pwd)
-DATA_DIR="${THIS_DIR}/temp/"
+TEMP_DIR="${THIS_DIR}/temp/"
 
-if [[ ! -d "${DATA_DIR}" ]]; then
-  echo "${DATA_DIR} doesn't exist, will create one";
-  mkdir -p ${DATA_DIR}
+if [[ ! -d "${TEMP_DIR}" ]]; then
+  echo "${TEMP_DIR} doesn't exist, will create one";
+  mkdir -p ${TEMP_DIR}
 fi
-cd ${DATA_DIR}
+cd ${TEMP_DIR}
 
 #
 # Prepare models
@@ -104,18 +108,50 @@ case $TYPE in
     prep_inception_model
     ;;
   nin)
-    echo "Preparing nin model..."
+    prep_nin_model
     ;;
   inceptionbn)
     prep_inception_model
     ;;
   squeezenet)
-    echo "Preparing squeezenet model..."
+    prep_squeezenet_model
     ;;
   resnet)
     echo "Preparing resnet model..."
     ;;
   caffenet)
-    echo "Preparing caffenet model..."
+    prep_caffenet_model
     ;;
 esac
+
+echo "   Cleaning..."
+cd ${THIS_DIR}
+rm -rf ${TEMP_DIR}
+
+echo "Done."
+echo " "
+echo "Contents for this dir:"
+ls -ltrh
+
+
+# model2json.py script does the same as this function
+#
+#prep_json_for_js(){
+#  # To call function
+#  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
+#
+#  symbolName=$1".json"
+#  jsName=$1"-js.json"
+#  paramsFile=$2
+#
+#  # Create Symbol + params file for JSON
+#  cp $symbolName $jsName
+#  sed -i '1s/^/{\n"symbol":\n/' $jsName
+#  sed -i '$s/$/,/' $jsName
+#  echo -en "\n" >> $jsName
+#  cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
+#  echo -en "\n" >> $jsName
+#  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
+#  echo -en "\n" >> $jsName
+#  echo } >> $jsName
+#}
