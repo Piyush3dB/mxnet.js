@@ -14,6 +14,37 @@ USAGE (){
 }
 
 
+
+
+# model2json.py script does the same as this function
+prep_json_for_js(){
+  # To call function
+  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
+
+  outFile=$1
+  inFile=$2
+  paramsFile=$3
+  synsetFile=$4
+
+  jsName=$outFile
+
+
+  # Create Symbol + params file for JSON
+  cp $inFile $jsName
+  sed -i '1s/^/{\n"symbol":\n/' $jsName
+  sed -i '$s/$/,/' $jsName
+  echo -en "\n" >> $jsName
+  cat $synsetFile | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
+  echo -en "\n" >> $jsName
+  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
+  echo -en "\n" >> $jsName
+  echo } >> $jsName
+}
+
+
+
+
+
 prep_nin_model(){
   echo "Preparing caffenet model..."
 
@@ -61,7 +92,9 @@ prep_inception_model(){
   tar -zxvf inception-bn.tar.gz
 
   echo "   Running python script to generate json model for JS..."
-  python ../../tools/model2json.py ../inception-bn-model.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+  #python ../../tools/model2json.py ../inception-bn-model.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+  prep_json_for_js ../inception-bn-model.json Inception-BN-symbol.json Inception-BN-0126.params synset.txt
+  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
 
 }
 
@@ -124,34 +157,12 @@ case $TYPE in
     ;;
 esac
 
-echo "   Cleaning..."
-cd ${THIS_DIR}
-rm -rf ${TEMP_DIR}
+#echo "   Cleaning..."
+#cd ${THIS_DIR}
+#rm -rf ${TEMP_DIR}
 
 echo "Done."
 echo " "
 echo "Contents for this dir:"
 ls -ltrh
 
-
-# model2json.py script does the same as this function
-#
-#prep_json_for_js(){
-#  # To call function
-#  #prep_json_for_js Inception-BN-symbol Inception-BN-0126.params
-#
-#  symbolName=$1".json"
-#  jsName=$1"-js.json"
-#  paramsFile=$2
-#
-#  # Create Symbol + params file for JSON
-#  cp $symbolName $jsName
-#  sed -i '1s/^/{\n"symbol":\n/' $jsName
-#  sed -i '$s/$/,/' $jsName
-#  echo -en "\n" >> $jsName
-#  cat synset.txt | sed 's/.*/"&",/' | tr '\n' ' ' | sed 's/.*/"synset": [&],/' | sed 's/, ],/],/g' >> $jsName
-#  echo -en "\n" >> $jsName
-#  base64 -w 0 $paramsFile | sed 's/.*/"parambase64": "&"/' >> $jsName
-#  echo -en "\n" >> $jsName
-#  echo } >> $jsName
-#}
