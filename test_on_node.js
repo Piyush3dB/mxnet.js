@@ -3,10 +3,10 @@
 var mx = require("./mxnet_predict.js");
 //var model = require("./model/fastpoor.json");
 //var model = require("./model/inception-bn-model.json");
-var model = require("./model/data/Inception-BN-symbol-js.json");
+//var model = require("./model/data/Inception-BN-symbol-js.json");
 
 //var model = require("./model/squeezenet_v1.0-symbol-js.json");
-//var model = require("./model/squeezenet_v1.1-symbol-js.json");
+var model = require("./model/squeezenet-model.json");
 
 
 
